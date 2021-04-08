@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.shardingjdbc.mapper.MtoUserMapper">
+
+    <select id="selectUserList" resultType="com.study.shardingjdbc.model.MtoUser">
+        select * from mto_user
+    </select>
+
+    <insert id="insert">
+        INSERT INTO `mto_user`(`username`, `name`, `avatar`, `mobile`, `email`, `password`, `status`, `created`, `updated`, `last_login`, `gender`, `role_id`, `comments`, `posts`, `signature`)
+         VALUES ('1234567', '奋斗~~3', 'https://qzapp.qlogo.cn/qzapp/101567880/8C25123586AF22677122B9ED369372C4/100', '15133137210', NULL, '3DL87QO5J60V8IT3OAR06DLR0E', 0, now(), NULL, now(), 0, 1, 2, 3, '永远不知道自己有多菜');
+    </insert>
+
+</mapper>

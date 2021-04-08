@@ -1,0 +1,68 @@
+server:
+  port: 8080
+spring:
+  # 配置sharding-jdbc
+  shardingsphere:
+    datasource:
+      names: datamaster0,dataslave0,dataslave1
+      # 配置主节点信息
+      datamaster0:
+        type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver # 使用驱动
+        jdbc-url: jdbc:mysql://localhost:3306/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        username: root # 数据库用户名
+        password: 123456 # 数据库密码
+        connectionTimeoutMilliseconds: 30000 # 连接超时控制
+        idleTimeoutMilliseconds: 60000 # 连接空闲时间设置
+        maxPoolSize: 1 # 连接池中最大维持的连接数量
+        minPoolSize: 1 # 连接池的最小连接数量
+        maintenanceIntervalMilliseconds: 30000 # 连接维护的时间间隔 atomikos框架需求
+      # 配置从节点信息
+      dataslave0:
+        type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver  # 使用驱动
+        jdbc-url: jdbc:mysql://localhost:3307/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        username: root # 数据库用户名
+        password: 123456 # 数据库密码
+        connectionTimeoutMilliseconds: 3000 # 连接超时控制
+        idleTimeoutMilliseconds: 6000 # 连接空闲时间设置
+        maintenanceIntervalMilliseconds: 30000 # 连接维护的时间间隔 atomikos框架需求
+        maxPoolSize: 1 # 连接池中最大维持的连接数量
+        minPoolSize: 1 # 连接池的最小连接数量
+      dataslave1:
+        type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver  # 使用驱动
+        jdbc-url: jdbc:mysql://localhost:3308/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        username: root # 数据库用户名
+        password: 123456 # 数据库密码
+        maxPoolSize: 1 # 连接池中最大维持的连接数量
+        minPoolSize: 1 # 连接池的最小连接数量
+        connectionTimeoutMilliseconds: 3000 # 连接超时控制
+        idleTimeoutMilliseconds: 6000 # 连接空闲时间设置
+        maintenanceIntervalMilliseconds: 3000 # 连接维护的时间间隔 atomikos框架需求
+      props:
+        sql.show: true #是否开启SQL显示，默认值: false
+    masterslave:
+      name: masterslave0 # 配置读写分离名称，唯一
+      load-balance-algorithm-type: ROUND_ROBIN # 配置负载均衡方式
+      master-data-source-name: datamaster0 # master节点
+      slave-data-source-names: # 从节点信息
+        - dataslave0
+        - dataslave1
+    orchestration:
+      datamaster0:
+        orchestrationType: registry_center
+        instanceType: zookeeper
+        serverLists: localhost:2181
+        namespace: orchestration
+        props:
+          overwrite: false
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: on
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  type-aliases-package: com.study.shadingjdbc.model
+logging:
+  level:
+    com.study.shardingjdbc: debug
