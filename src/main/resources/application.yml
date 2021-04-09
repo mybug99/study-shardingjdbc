@@ -51,7 +51,7 @@ spring:
         - dataslave1
     orchestration:
       datamaster0:
-        orchestrationType: registry_center
+        orchestrationType: registry_center,config_center
         instanceType: zookeeper
         serverLists: localhost:2181
         namespace: orchestration
