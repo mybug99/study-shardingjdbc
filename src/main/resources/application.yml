@@ -4,12 +4,12 @@ spring:
   # 配置sharding-jdbc
   shardingsphere:
     datasource:
-      names: datamaster0,dataslave0,dataslave1
+      names: ds0,ds1,ds2
       # 配置主节点信息
-      ds1:
+      ds0:
         type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
         driverClassName: com.mysql.cj.jdbc.Driver # 使用驱动
-        jdbc-url: jdbc:mysql://localhost:3306/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        jdbc-url: jdbc:mysql://localhost:3306/study_sharding?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
         username: root # 数据库用户名
         password: 123456 # 数据库密码
         connectionTimeoutMilliseconds: 30000 # 连接超时控制
@@ -18,10 +18,10 @@ spring:
         minPoolSize: 1 # 连接池的最小连接数量
         maintenanceIntervalMilliseconds: 30000 # 连接维护的时间间隔 atomikos框架需求
       # 配置从节点信息
-      ds2:
+      ds1:
         type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
         driverClassName: com.mysql.cj.jdbc.Driver  # 使用驱动
-        jdbc-url: jdbc:mysql://localhost:3307/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        jdbc-url: jdbc:mysql://localhost:3307/study_sharding?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
         username: root # 数据库用户名
         password: 123456 # 数据库密码
         connectionTimeoutMilliseconds: 3000 # 连接超时控制
@@ -29,10 +29,10 @@ spring:
         maintenanceIntervalMilliseconds: 30000 # 连接维护的时间间隔 atomikos框架需求
         maxPoolSize: 1 # 连接池中最大维持的连接数量
         minPoolSize: 1 # 连接池的最小连接数量
-      ds3:
+      ds2:
         type: com.zaxxer.hikari.HikariDataSource # 使用HikariDataSource
         driverClassName: com.mysql.cj.jdbc.Driver  # 使用驱动
-        jdbc-url: jdbc:mysql://localhost:3308/db_mblog?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
+        jdbc-url: jdbc:mysql://localhost:3308/study_sharding?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true  # 连接的数据库
         username: root # 数据库用户名
         password: 123456 # 数据库密码
         maxPoolSize: 1 # 连接池中最大维持的连接数量
@@ -42,19 +42,56 @@ spring:
         maintenanceIntervalMilliseconds: 3000 # 连接维护的时间间隔 atomikos框架需求
       props:
         sql.show: true #是否开启SQL显示，默认值: false
-    masterslave:
-      name: masterslave0 # 配置读写分离名称，唯一
-      load-balance-algorithm-type: ROUND_ROBIN # 配置负载均衡方式
-      master-data-source-name: ds1 # master节点
-      slave-data-source-names: # 从节点信息
-        - ds2
-        - ds3
+    sharding:
+      tables:
+        # 配置mto_user逻辑表的相关分库分表策略
+        mto_user:
+          # 配置数据节点的信息 库+表
+          actual-data-nodes: ds${0..2}.mto_user_${0..2}
+          table-strategy:
+            #使用inline可以指定策略，别的都是指定分片算法名称或其它
+            inline:
+              # 指定分片的key
+              shardingColumn: id
+              # 分片算法
+              algorithmExpression: mto_user_${id % 3}
+        mto_user_role:
+          actual-data-nodes:  ds${0..2}.mto_user_role_${0..2}
+          table-strategy:
+            inline:
+              shardingColumn: user_id
+              algorithmExpression: mto_user_role_${user_id % 3}
+        # 配置分片键生成器
+        keyGenerator:
+          # 分片键的字段
+          column: id
+          # 分片算法
+          type: SNOWFLAKE
+      default-key-generator:
+        # 分片键的字段
+        column: id
+        # 分片算法
+        type: SNOWFLAKE
+      # 默认库策略，使用id去找库
+      default-database-strategy:
+        inline:
+          shardingColumn: id
+          algorithmExpression: ds${id % 3}
+      # 配置绑定表关系
+      binding-tables:
+        # mto_user和mto_user_role是绑定关系
+        - mto_user,mto_user_role
+
+#mybatis相关配置
 mybatis:
+  # sql文件位置
   mapper-locations: classpath:/mapper/**/*.xml
+  # 属性配置
   configuration:
     map-underscore-to-camel-case: on
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   type-aliases-package: com.study.shadingjdbc.model
+# 日志配置
 logging:
   level:
     com.study.shardingjdbc: debug

@@ -3,6 +3,7 @@ package com.study.shardingjdbc.model;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * @author Ryan
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class MtoUser {
-    private Long id;
+    private String id;
     private String username;
     private String name;
     private String avatar;
@@ -19,12 +20,17 @@ public class MtoUser {
     private String email;
     private String password;
     private Long status;
-    private LocalDateTime created;
-    private LocalDateTime updated;
-    private LocalDateTime lastLogin;
+    private Date created;
+    private Date updated;
+    private Date lastLogin;
     private Long gender;
     private Long role_id;
     private Long comments;
     private Long posts;
     private String signature;
+
+
+    public static void main(String[] args) {
+        System.out.println(Long.parseLong("680831425380876288") % 3);
+    }
 }

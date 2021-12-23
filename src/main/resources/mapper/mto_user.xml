@@ -7,8 +7,8 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO `mto_user`(`username`)
-         VALUES ('1234567');
+        INSERT INTO `mto_user`(`username`,name,status,gender,comments,posts)
+         VALUES (now(),'tests',1,1,2,0);
     </insert>
 
 </mapper>
